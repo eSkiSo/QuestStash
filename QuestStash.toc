@@ -1,0 +1,10 @@
+## Interface: 80000
+## Title: Quest Stash
+## Author: eSkiSo
+## Notes: Removes current watched quests and save them for later, then restores on request
+## Version: 1.0
+## DefaultState: Enabled
+## SavedVariables: quest_stash
+## SavedVariablesPerCharacter: saved_quest_list
+
+QuestStash.lua

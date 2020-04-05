@@ -2,7 +2,7 @@
 
 **World of Warcraft** Addon to automatically hide watched quest when a mythic key stone is started, then restores them when it is done.
 
-![Screenshot](screenshot.jpg)
+![Screenshot](screenshot.png)
 
 Quest Stash Commands [/qstash ]:
 	* hide - Hides all watched quests

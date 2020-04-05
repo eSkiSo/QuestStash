@@ -5,11 +5,11 @@
 ![Screenshot](screenshot.png)
 
 Quest Stash Commands [/qstash ]:
-	* hide - Hides all watched quests
-	* show - Shows all hidden watched quests
-	* save - Saves current watched quests
-	* on - Activates automatic mode (hides on mythic key start and shows when it is over)
-	* off - Disables automatic mode
-	* reset - Clears saved list
-	* status - Shows current status (Active, Inactive)
-	* help - Shows this
+* hide - Hides all watched quests
+* show - Shows all hidden watched quests
+* save - Saves current watched quests
+* on - Activates automatic mode (hides on mythic key start and shows when it is over)
+* off - Disables automatic mode
+* reset - Clears saved list
+* status - Shows current status (Active, Inactive)
+* help - Shows this

@@ -60,11 +60,29 @@ local function showQuests()
 	end
 end
 
+-- Track All Quests
+local function trackAllQuests()
+	print("|cFFFFFF00Quest Stash: |cFF00FF00Tracking All Quests")
+	numEntries, numQuests = GetNumQuestLogEntries();
+	-- get all quests in quest log
+	for i=1, numEntries do
+		local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(i)
+		if isHeader == false then
+			AddQuestWatch(i)
+		end
+	end
+	return true
+end
+
 -- Triggers on events and slash commands
 local function handler(msg)
 
 	if msg == "hide" then
 		hideQuests()
+		return true
+
+	elseif msg == "all" then
+		trackAllQuests()
 		return true
 
 	elseif msg == "questlog" then
@@ -122,16 +140,18 @@ local function handler(msg)
 
 	elseif msg == "help" then
 		print("|cFFFFFF00Quest Stash commands:")
+		print("|cFFFFFF00 all  - Tracks all quests in questlog")
 		print("|cFFFFFF00 hide - Hides all watched quests")
 		print("|cFFFFFF00 show - Shows all hidden watched quests")
 		print("|cFFFFFF00 save - Saves current watched quests")
-		print("|cFFFFFF00 on - Activates automatic mode (hides on mythic key start and shows when it is over)")
-		print("|cFFFFFF00 off - Disables automatic mode")
+		print("|cFFFFFF00 on   - Activates automatic mode (hides on mythic key start and shows when it is over)")
+		print("|cFFFFFF00 off  - Disables automatic mode")
 		print("|cFFFFFF00 reset - Clears saved list")
 		print("|cFFFFFF00 status - Shows current status (Active, Inactive)")
 		print("|cFFFFFF00 help - Shows this")
 
 	else
+		if type(saved_quest_list) ~= "table" then saved_quest_list = { } end
 		local savedQuests = table.getn(saved_quest_list)
 		if savedQuests > 0 then
 			showQuests()
@@ -186,4 +206,3 @@ for _,event in ipairs(watchEvents()) do
 end
 
 frame:SetScript("OnEvent", eventHandler);
-

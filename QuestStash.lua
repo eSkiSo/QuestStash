@@ -19,12 +19,13 @@ end
 local function hideQuests()
 	print("|cFFFFFF00Quest Stash: |cFF00FF00Hidding Quests")
 	saved_quest_list = { }
-	for i = GetNumQuestWatches(), 1, -1 do
-		local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(GetQuestIndexForWatch(i))
-		if ( not isHeader ) then
+	for i = C_QuestLog.GetNumQuestWatches(), 1, -1 do
+		--local title, questLogIndex, questID, campaignID, level, difficultyLevel, suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask, isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden, isAutoComplete, overridesSortOder, readyForTranslation = C_QuestLog.GetInfo(C_QuestLog.GetQuestIDForLogIndex(i))
+		local questInfo = C_QuestLog.GetInfo(C_QuestLog.GetLogIndexForQuestID(C_QuestLog.GetQuestIDForQuestWatchIndex(i)))
+		if ( not questInfo['isHeader'] and not questInfo['isHidden'] and questInfo['questLogIndex'] > 0) then
 	 		-- DEFAULT_CHAT_FRAME:AddMessage("Hidding: " .. title)
-	 		tinsert(saved_quest_list, title)
-	 		RemoveQuestWatch(GetQuestIndexForWatch(i))
+	 		tinsert(saved_quest_list, questInfo['questID'])
+	 		C_QuestLog.RemoveQuestWatch(questInfo['questID'])
 		end
 	end
 	local savedQuests = table.getn(saved_quest_list)
@@ -40,21 +41,9 @@ local function showQuests()
 		return true 
 	else
 		print("|cFFFFFF00Quest Stash: |cFF00FF00Re-Tracking Quests (" .. savedQuests .. ")")
-		numEntries, numQuests = GetNumQuestLogEntries();
-		-- get all quests in quest log
-		for i=1, numEntries do
-			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(i)
-			if isHeader == false then
-				-- DEFAULT_CHAT_FRAME:AddMessage("Comparing: " .. title .. " id: " .. i )
-				for j, savedName in ipairs(saved_quest_list) do
-					if title == savedName then
-						AddQuestWatch(i)
-						-- DEFAULT_CHAT_FRAME:AddMessage("Re-Traking: " .. title )
-					end
-				end
-			end
+		for j, questID in ipairs(saved_quest_list) do
+			C_QuestLog.AddQuestWatch(questID)
 		end
-		-- Reset saves quests
 		saved_quest_list = { }
 		return true
 	end
@@ -63,12 +52,13 @@ end
 -- Track All Quests
 local function trackAllQuests()
 	print("|cFFFFFF00Quest Stash: |cFF00FF00Tracking All Quests")
-	numEntries, numQuests = GetNumQuestLogEntries();
+	numEntries, numQuests = C_QuestLog.GetNumQuestLogEntries();
 	-- get all quests in quest log
 	for i=1, numEntries do
-		local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(i)
-		if isHeader == false then
-			AddQuestWatch(i)
+		--local title, questLogIndex, questID, campaignID, level, difficultyLevel, suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask, isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden, isAutoComplete, overridesSortOder, readyForTranslation = C_QuestLog.GetInfo(i)
+		local questInfo = C_QuestLog.GetInfo(i)
+		if ( not questInfo['isHeader'] and not questInfo['isHidden'] ) then
+			C_QuestLog.AddQuestWatch(questInfo['questID'])
 		end
 	end
 	return true
@@ -81,15 +71,31 @@ local function handler(msg)
 		hideQuests()
 		return true
 
+	elseif msg == "list" then
+		--local numEntries, numQuests = C_QuestLog.GetNumQuestLogEntries()
+		--DEFAULT_CHAT_FRAME:AddMessage(numEntries .. " entries containing " .. numQuests .. " quests in your quest log.");
+		if (table.getn(saved_quest_list) > 0) then
+			print("|cFFFFFF00Quest Stash: |cFF00FF00Saved Quests:")
+			for j, questID in ipairs(saved_quest_list) do
+				print(C_QuestLog.GetTitleForQuestID(questID))
+			end
+		else
+			print("|cFFFFFF00Quest Stash: |cFF00FF00No Saved Quests")
+		end
+		return true
+
 	elseif msg == "all" then
 		trackAllQuests()
 		return true
 
 	elseif msg == "questlog" then
-		numEntries, numQuests = GetNumQuestLogEntries();
-		for i=1, numQuests do
-			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(i)
-			DEFAULT_CHAT_FRAME:AddMessage("Quest: " .. title .. " Quest ID: " .. questID )
+		numEntries, numQuests = C_QuestLog.GetNumQuestLogEntries();
+		for i=1, numEntries do
+			--local title, questLogIndex, questID, campaignID, level, difficultyLevel, suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask, isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden, isAutoComplete, overridesSortOder, readyForTranslation = C_QuestLog.GetInfo(i)
+			local questInfo = C_QuestLog.GetInfo(i)
+			if ( not questInfo['isHeader'] and not questInfo['isHidden'] ) then
+				DEFAULT_CHAT_FRAME:AddMessage("Quest: " .. questInfo['title'] .. " (" .. questInfo['questID'] .. ")" ) 
+			end
 		end
 		return true
 
@@ -106,11 +112,12 @@ local function handler(msg)
 	elseif msg == "save" then
 		print("|cFFFFFF00Quest Stash: |cFF00FF00Saving Quests")
 		saved_quest_list = { }
-		for i = GetNumQuestWatches(), 1, -1 do
-			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle(GetQuestIndexForWatch(i))
-			if ( not isHeader ) then
-		 		-- DEFAULT_CHAT_FRAME:AddMessage("Saving: " .. title)
-		 		tinsert(saved_quest_list, title)
+		for i = C_QuestLog.GetNumQuestWatches(), 1, -1 do
+			--local title, questLogIndex, questID, campaignID, level, difficultyLevel, suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask, isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden, isAutoComplete, overridesSortOder, readyForTranslation = C_QuestLog.GetInfo(C_QuestLog.GetQuestIDForLogIndex(i))
+			local questInfo = C_QuestLog.GetInfo(C_QuestLog.GetLogIndexForQuestID(C_QuestLog.GetQuestIDForQuestWatchIndex(i)))
+			if ( not questInfo['isHeader'] and not questInfo['isHidden'] and questInfo['questLogIndex'] > 0) then
+		 		DEFAULT_CHAT_FRAME:AddMessage("Saving: " .. questInfo['title'])
+		 		tinsert(saved_quest_list, questInfo['questID'])
 			end
 		end
 		local savedQuests = table.getn(saved_quest_list)
@@ -130,7 +137,7 @@ local function handler(msg)
 		-- print("|cFFFFFF00Quest Stash: |cFFFF0000Type:" .. type(saved_quest_list))
 		if type(saved_quest_list) ~= "table" then saved_quest_list = { } end
 		local savedQuests = table.getn(saved_quest_list)
-		print("|cFFFFFF00Quest Stash: |cFFFF0000Saved Quests:" .. savedQuests)
+		print("|cFFFFFF00Quest Stash: |cFFFF0000Saved Quests: " .. savedQuests)
 		if(quest_stash == true) then
 			print("|cFFFFFF00Quest Stash Status:|cFF00FF00 Active")
 		else
@@ -138,16 +145,22 @@ local function handler(msg)
 		end
 		return true
 
+	elseif msg == "version" then
+		print("|cFFFFFF00Quest Stash: |cFF00FF00 Version: 1.4 ")
+		return true
+
 	elseif msg == "help" then
 		print("|cFFFFFF00Quest Stash commands:")
 		print("|cFFFFFF00 all  - Tracks all quests in questlog")
 		print("|cFFFFFF00 hide - Hides all watched quests")
 		print("|cFFFFFF00 show - Shows all hidden watched quests")
+		print("|cFFFFFF00 list - Lists the stashed quests")
 		print("|cFFFFFF00 save - Saves current watched quests")
 		print("|cFFFFFF00 on   - Activates automatic mode (hides on mythic key start and shows when it is over)")
 		print("|cFFFFFF00 off  - Disables automatic mode")
 		print("|cFFFFFF00 reset - Clears saved list")
 		print("|cFFFFFF00 status - Shows current status (Active, Inactive)")
+		print("|cFFFFFF00 version - Shows current version")
 		print("|cFFFFFF00 help - Shows this")
 
 	else

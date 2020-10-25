@@ -149,7 +149,7 @@ local function handler(msg)
 		print("|cFFFFFF00Quest Stash: |cFF00FF00 Version: 1.4 ")
 		return true
 
-	elseif msg == "help" then
+	elseif msg == "help" or string.len(msg) > 1 then
 		print("|cFFFFFF00Quest Stash commands:")
 		print("|cFFFFFF00 all  - Tracks all quests in questlog")
 		print("|cFFFFFF00 hide - Hides all watched quests")
@@ -219,3 +219,4 @@ for _,event in ipairs(watchEvents()) do
 end
 
 frame:SetScript("OnEvent", eventHandler);
+
